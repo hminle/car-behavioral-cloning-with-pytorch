@@ -17,30 +17,31 @@ class CarModel(nn.Module):
         self.conv_layers = nn.Sequential(
             # input is batch_size x 3 x 66 x 200
             nn.Conv2d(3, 24, 5, stride=2, bias=False),
-            nn.ELU(0.2, inplace=True),
-            
+            #nn.ELU(0.2, inplace=True),
+            nn.ELU(),
             nn.Conv2d(24, 36, 5, stride=2, bias=False),
             #nn.BatchNorm2d(args.D_features * 2),
-            nn.ELU(0.2, inplace=True),
+            nn.ELU(),
             
             nn.Conv2d(36, 48, 5, stride=2, bias=False),
             #nn.BatchNorm2d(args.D_features * 4),
-            nn.ELU(0.2, inplace=True),
+            nn.ELU(),
             
             nn.Conv2d(48, 64, 3, stride=1, bias=False),
             #nn.BatchNorm2d(args.D_features * 8),
-            nn.ELU(0.2, inplace=True),
+            nn.ELU(),
             
             nn.Conv2d(64, 64, 3, stride=1, bias=False),
-            nn.ELU(0.2, inplace=True),
+            nn.ELU(),
         )
         self.linear_layers = nn.Sequential(
             #input from sequential conv layers
             nn.Linear(in_features=64*1*18, out_features=100, bias=False),
-            nn.ELU(0.2, inplace=True),
+            nn.ELU(),
             nn.Linear(in_features=100, out_features=50, bias=False),
-            nn.ELU(0.2, inplace=True),
+            nn.ELU(),
             nn.Linear(in_features=50, out_features=10, bias=False),
+            nn.ELU(),
             nn.Linear(in_features=10, out_features=1, bias=False))
         self._initialize_weights()
         
