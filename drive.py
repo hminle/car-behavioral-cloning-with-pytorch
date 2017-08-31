@@ -48,6 +48,33 @@ speed_limit = MAX_SPEED
 transformations = transforms.Compose([transforms.ToTensor(),
                                      transforms.Normalize((127.5, 127.5, 127.5), (127.5, 127.5, 127.5))
                                      ])
+
+class SimplePIController:
+    def __init__(self, Kp, Ki):
+        self.Kp = Kp
+        self.Ki = Ki
+        self.set_point = 0.
+        self.error = 0.
+        self.integral = 0.
+
+    def set_desired(self, desired):
+        self.set_point = desired
+
+    def update(self, measurement):
+        # proportional error
+        self.error = self.set_point - measurement
+
+        # integral error
+        self.integral += self.error
+
+        return self.Kp * self.error + self.Ki * self.integral
+
+
+controller = SimplePIController(0.1, 0.002)
+set_speed = 9
+controller.set_desired(set_speed)
+
+
 #registering event handler for the server
 @sio.on('telemetry')
 def telemetry(sid, data):
@@ -58,6 +85,7 @@ def telemetry(sid, data):
         throttle = float(data["throttle"])
         # The current speed of the car
         speed = float(data["speed"])
+        
         # The current image from the center camera of the car
         image = Image.open(BytesIO(base64.b64decode(data["image"])))
         try:
@@ -65,19 +93,12 @@ def telemetry(sid, data):
             image = utils.preprocess(image) # apply the preprocessing
             image = transformations(image)
             #image = np.array([image])       # the model expects 4D array
-            #print("image")
-            #print(image.shape)
-            #image = torch.from_numpy(image)
-            #image = image.float()
             image = image.view(-1, 3, 66, 200)
             image = Variable(image)
-            #print(image.data)
 
             # predict the steering angle for the image
-            print("start")
-            steering_angle = model(image).view(-1).data.numpy()
-            print("steering")
-            #print(steering_angle.shape)
+            steering_angle = model(image).view(-1).data.numpy()[0]
+            
             # lower the throttle as the speed increases
             # if the speed is above the current speed limit, we are on a downhill.
             # make sure we slow down first and then go back to the original max speed.
@@ -86,11 +107,12 @@ def telemetry(sid, data):
                 speed_limit = MIN_SPEED  # slow down
             else:
                 speed_limit = MAX_SPEED
-            throttle = 1.0 - steering_angle**2 - (speed/speed_limit)**2
-
+            #throttle = 1.0 - steering_angle**2 - (speed/speed_limit)**2
+            throttle = controller.update(float(speed)) - 0.1
             print('{} {} {}'.format(steering_angle, throttle, speed))
             send_control(steering_angle, throttle)
         except Exception as e:
+            print("Exception")
             print(e)
 
         # save frame
