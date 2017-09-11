@@ -52,9 +52,9 @@ def choose_image(data_dir, center, left, right, steering_angle):
     """
     choice = np.random.choice(3)
     if choice == 0:
-        return load_image(data_dir, left), steering_angle + 0.2
+        return load_image(data_dir, left), steering_angle + 0.3
     elif choice == 1:
-        return load_image(data_dir, right), steering_angle - 0.2
+        return load_image(data_dir, right), steering_angle - 0.3
     return load_image(data_dir, center), steering_angle
 
 

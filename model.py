@@ -20,19 +20,20 @@ class CarModel(nn.Module):
             #nn.ELU(0.2, inplace=True),
             nn.ELU(),
             nn.Conv2d(24, 36, 5, stride=2, bias=False),
-            #nn.BatchNorm2d(args.D_features * 2),
             nn.ELU(),
+            nn.BatchNorm2d(36),
             
             nn.Conv2d(36, 48, 5, stride=2, bias=False),
-            #nn.BatchNorm2d(args.D_features * 4),
             nn.ELU(),
+            nn.BatchNorm2d(48),
             
             nn.Conv2d(48, 64, 3, stride=1, bias=False),
-            #nn.BatchNorm2d(args.D_features * 8),
             nn.ELU(),
+            nn.BatchNorm2d(64),
             
             nn.Conv2d(64, 64, 3, stride=1, bias=False),
             nn.ELU(),
+            nn.Dropout(p=0.3)
         )
         self.linear_layers = nn.Sequential(
             #input from sequential conv layers
