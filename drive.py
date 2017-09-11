@@ -87,9 +87,9 @@ def telemetry(sid, data):
         speed = float(data["speed"])
         
         # The current image from the center camera of the car
-        image = Image.open(BytesIO(base64.b64decode(data["image"])))
+        original_image = Image.open(BytesIO(base64.b64decode(data["image"])))
         try:
-            image = np.asarray(image)       # from PIL image to numpy array
+            image = np.asarray(original_image)       # from PIL image to numpy array
             image = utils.preprocess(image) # apply the preprocessing
             image = transformations(image)
             #image = np.array([image])       # the model expects 4D array
@@ -119,7 +119,7 @@ def telemetry(sid, data):
         if args.image_folder != '':
             timestamp = datetime.utcnow().strftime('%Y_%m_%d_%H_%M_%S_%f')[:-3]
             image_filename = os.path.join(args.image_folder, timestamp)
-            image.save('{}.jpg'.format(image_filename))
+            original_image.save('{}.jpg'.format(image_filename))
     else:
         
         sio.emit('manual', data={}, skip_sid=True)
@@ -175,6 +175,5 @@ if __name__ == '__main__':
 
     # wrap Flask application with engineio's middleware
     app = socketio.Middleware(sio, app)
-
     # deploy as an eventlet WSGI server
     eventlet.wsgi.server(eventlet.listen(('', 4567)), app)
