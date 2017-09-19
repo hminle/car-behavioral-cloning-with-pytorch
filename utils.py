@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.image as mpimg
 import torch.utils.data as data
 
-IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS = 66, 200, 3
+IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS = 16, 32, 1
 INPUT_SHAPE = (IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS)
 
 
@@ -34,14 +34,20 @@ def rgb2yuv(image):
     """
     return cv2.cvtColor(image, cv2.COLOR_RGB2YUV)
 
+def rgb2hsv(image):
+    """
+    Convert the image from RGB to HSV 
+    """
+    return cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
 
 def preprocess(image):
     """
     Combine all preprocess functions into one
     """
     image = crop(image)
-    image = resize(image)
-    image = rgb2yuv(image)
+    image = rgb2hsv(image)
+    #image = resize(image)
+
     return image
 
 
@@ -52,9 +58,9 @@ def choose_image(data_dir, center, left, right, steering_angle):
     """
     choice = np.random.choice(3)
     if choice == 0:
-        return load_image(data_dir, left), steering_angle + 0.3
+        return load_image(data_dir, left), steering_angle + 0.2
     elif choice == 1:
-        return load_image(data_dir, right), steering_angle - 0.3
+        return load_image(data_dir, right), steering_angle - 0.2
     return load_image(data_dir, center), steering_angle
 
 
@@ -120,44 +126,15 @@ def random_brightness(image):
     return cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
 
 
-def augument(data_dir, center, left, right, steering_angle, range_x=100, range_y=10):
-    """
-    Generate an augumented image and adjust steering angle.
-    (The steering angle is associated with the center image)
-    """
-    image, steering_angle = choose_image(data_dir, center, left, right, steering_angle)
-    image, steering_angle = random_flip(image, steering_angle)
-    image, steering_angle = random_translate(image, steering_angle, range_x, range_y)
-    image = random_shadow(image)
-    image = random_brightness(image)
+def augument_img(image, steering_angle):
+    if np.random.rand() < 0.6:
+        image, steering_angle = random_flip(image, steering_angle)
+        image, steering_angle = random_translate(image, steering_angle, 100, 10)
+        image = random_shadow(image)
+        image = random_brightness(image)
+    image = preprocess(image)
     return image, steering_angle
 
-
-def batch_generator(data_dir, image_paths, steering_angles, batch_size, is_training):
-    """
-    Generate training image give image paths and associated steering angles
-    """
-    images = np.empty([batch_size, IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS])
-    steers = np.empty(batch_size)
-    while True:
-        i = 0
-        for index in np.random.permutation(image_paths.shape[0]):
-            center, left, right = image_paths[index]
-            steering_angle = steering_angles[index]
-            # argumentation
-            if is_training and np.random.rand() < 0.6:
-                image, steering_angle = augument(data_dir, center, left, right, steering_angle)
-            else:
-                image = load_image(data_dir, center) 
-            # add the image and steering angle to the batch
-            images[i] = preprocess(image)
-            steers[i] = steering_angle
-            i += 1
-            if i == batch_size:
-                break
-        yield images, steers
-
-        
 class CarDataset(data.Dataset):
     """
     Dataset wrapping images and target steering_angle.
@@ -181,12 +158,46 @@ class CarDataset(data.Dataset):
         else:
             image = load_image(self.data_dir, center) 
         image = preprocess(image)
-        
+
         if self.transform is not None:
             image = self.transform(image)
-        
+            
         #label = torch.from_numpy(self.y_train[index])
         return image, steering_angle
+    
+    def __len__(self):
+        return self.X.shape[0]
+    
+class CarDataset3Img(data.Dataset):
+    """
+    Dataset wrapping images and target steering_angle.
+    """
+
+    def __init__(self, X, y, data_dir, transform=None):
+
+        self.X = X
+        self.y = y
+        self.data_dir = data_dir
+        self.transform = transform
+
+
+    def __getitem__(self, index):
+        center, left, right = self.X[index]
+        steering_angle = self.y[index]
+        image_left, steering_angle_left = augument_img(load_image(self.data_dir, left), steering_angle + 0.1) 
+
+        image_center, steering_angle_center = augument_img(load_image(self.data_dir, center), steering_angle) 
+
+        image_right, steering_angle_right = augument_img(load_image(self.data_dir, right), steering_angle - 0.1) 
+
+        
+        if self.transform is not None:
+            image_left = self.transform(image_left)
+            image_center = self.transform(image_center)
+            image_right = self.transform(image_right)
+            
+        #label = torch.from_numpy(self.y_train[index])
+        return (image_center, steering_angle_center), (image_left, steering_angle_left), (image_right, steering_angle_right)
     
     def __len__(self):
         return self.X.shape[0]

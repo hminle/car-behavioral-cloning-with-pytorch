@@ -45,9 +45,7 @@ MIN_SPEED = 10
 
 #and a speed limit
 speed_limit = MAX_SPEED
-transformations = transforms.Compose([transforms.ToTensor(),
-                                     transforms.Normalize((127.5, 127.5, 127.5), (127.5, 127.5, 127.5))
-                                     ])
+transformations = transforms.Compose([transforms.Lambda(lambda x: x/127.5 - 1)])
 
 class SimplePIController:
     def __init__(self, Kp, Ki):
@@ -92,10 +90,12 @@ def telemetry(sid, data):
             image = np.asarray(original_image)       # from PIL image to numpy array
             image = utils.preprocess(image) # apply the preprocessing
             image = transformations(image)
+            image = torch.Tensor(image)
             #image = np.array([image])       # the model expects 4D array
-            image = image.view(-1, 3, 66, 200)
-            image = Variable(image)
 
+            image = image.view(1, 3, 75, 320)
+            image = Variable(image)
+            
             # predict the steering angle for the image
             steering_angle = model(image).view(-1).data.numpy()[0]
             
@@ -107,8 +107,8 @@ def telemetry(sid, data):
                 speed_limit = MIN_SPEED  # slow down
             else:
                 speed_limit = MAX_SPEED
-            #throttle = 1.0 - steering_angle**2 - (speed/speed_limit)**2
-            throttle = controller.update(float(speed)) - 0.1
+            throttle = 1.0 - steering_angle**2 - (speed/speed_limit)**2
+            #throttle = controller.update(float(speed)) - 0.1
             print('{} {} {}'.format(steering_angle, throttle, speed))
             send_control(steering_angle, throttle)
         except Exception as e:
