@@ -19,8 +19,10 @@ The credis for this code goto [naokishibuya](https://github.com/naokishibuya).
 
 - Created the Dataloader for car dataset
 - Created the CarModel for training with the dataset. The model is based on The [NVIDIA model](https://devblogs.nvidia.com/parallelforall/deep-learning-self-driving-cars/).
-![NIVIDIA Model](https://devblogs.nvidia.com/parallelforall/wp-content/uploads/2016/08/cnn-architecture-624x890.png)
+- Created another Simple Car Model by reducing the number of Convolutional and Linear layers.
 - Modified drive.py so that it can load the Pytorch model.
+- After training Simple Model  around 15 epochs, the model can drive a car for one full lap without any crashing. 
+- Working models are put inside ```working_models``` dir
 
 ## Notes
 
