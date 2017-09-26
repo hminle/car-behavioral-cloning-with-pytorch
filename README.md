@@ -11,7 +11,8 @@ The repo is inspired by [naokishibuya](https://github.com/naokishibuya). I adapt
 
 ## Video demo: 
 [![Screenshot](screenshot.JPG)](https://youtu.be/nJcglRrftaY)
-
+-----
+[Youtube link](https://youtu.be/nJcglRrftaY)
 ## Challenges:
 
 - I think the most challenge is generating enough data for your model. For some tricky curves on the road, you need to creat more data.
