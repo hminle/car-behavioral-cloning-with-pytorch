@@ -10,7 +10,7 @@ Instead using Keras to build a model, I want to using Pytorch for the model and 
 The repo is inspired by [naokishibuya](https://github.com/naokishibuya). I adapt his augmentation methods.
 
 ## Video demo: 
-[youtube link](https://youtu.be/nJcglRrftaY)
+![Screenshot](./screenshot.JPG https://youtu.be/nJcglRrftaY)
 
 ## Challenges:
 
