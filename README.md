@@ -7,10 +7,11 @@
 I create this project after watching Siraj's video about how to simulate a self-driving car.
 Instead using Keras to build a model, I want to using Pytorch for the model and training.
 
-The credis for this code goto [naokishibuya](https://github.com/naokishibuya).
+The repo is inspired by [naokishibuya](https://github.com/naokishibuya). I adapt his augmentation methods.
 
 ## Challenges:
 
+- I think the most challenge is generating enough data for your model. For some tricky curves on the road, you need to creat more data.
 - Building a model in Pytorch is not as straighforward as in Keras. You need to understand the framework and how it processes data first.
 - Need to create a Dataloader for your own data.
 - Re-use as much code as possible.
