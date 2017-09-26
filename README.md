@@ -9,6 +9,9 @@ Instead using Keras to build a model, I want to using Pytorch for the model and 
 
 The repo is inspired by [naokishibuya](https://github.com/naokishibuya). I adapt his augmentation methods.
 
+## Video demo: 
+[youtube link](https://youtu.be/nJcglRrftaY)
+
 ## Challenges:
 
 - I think the most challenge is generating enough data for your model. For some tricky curves on the road, you need to creat more data.
