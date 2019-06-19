@@ -3,7 +3,7 @@
 ## Overview
 
 I create this project after watching Siraj's video about how to simulate a self-driving car.
-Instead using Keras to build a model, I want to using Pytorch for the model and training.
+Instead using Keras to build a model, I want to use Pytorch for the model and training.
 
 The repo is inspired by [naokishibuya](https://github.com/naokishibuya). I adapt his augmentation methods.
 
